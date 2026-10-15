@@ -1,93 +1,157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Interactive educational lab exploring Ethereum wallet derivation, cryptographic primitives, and address checksums.">
-<title>Ethereum Cryptography Lab | Homework 02</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Wallet Seed to Ethereum Address</title>
 <style>
-:root{color-scheme:dark;--bg:#080d18;--panel:#101a2b;--line:#263750;--text:#e7eef9;--muted:#9aabc3;--cyan:#67e8f9;--blue:#172b43}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14243a 0,#080d18 48rem);color:var(--text);font:16px/1.65 Inter,system-ui,-apple-system,Segoe UI,sans-serif}a{color:var(--cyan)}.wrap{max-width:1080px;margin:auto;padding:28px 20px 50px}.top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}.tag{font-size:.72rem;letter-spacing:.12em;border:1px solid #36516c;border-radius:7px;padding:5px 9px;color:var(--cyan)}h1{font-size:clamp(2.5rem,7vw,4.7rem);line-height:1.02;letter-spacing:-.055em;margin:28px 0 14px}h1 span{color:var(--cyan)}h2{font-size:1.55rem;letter-spacing:-.025em;line-height:1.2;margin:0 0 12px}h3{font-size:1.05rem;margin:0 0 7px}.lead,.muted,.small{color:var(--muted)}.lead{max-width:740px}.small{font-size:.88rem}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.panel,.metric{background:rgba(16,26,43,.92);border:1px solid var(--line);border-radius:15px;padding:20px;margin:15px 0}.metric{margin:0;background:#0b1423}.metric .label{font-size:.72rem;color:var(--muted);letter-spacing:.08em}.metric strong{display:block;color:var(--cyan);font-size:1.3rem;margin:4px 0}.nav{display:flex;flex-wrap:wrap;gap:8px;margin:25px 0}.nav button,.secondary{border:1px solid #344760;background:#111e31;color:#c6d5e9;border-radius:9px;padding:10px 13px;cursor:pointer}.nav button.active{border-color:#4a9db1;background:#19354a;color:#a5f3fc}.section{display:none}.section.active{display:block}.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:18px 0}.flow div{flex:1 1 110px;background:#0b1423;border:1px solid #2a405a;border-radius:10px;padding:12px;text-align:center;font-size:.82rem}.flow b{display:block;color:var(--cyan);margin-bottom:5px}.arrow{align-self:center;color:#6b829f}.notice{border:1px solid #6b5930;background:#241f16;color:#f6dda0;border-radius:10px;padding:13px;font-size:.86rem;margin:14px 0}.mono,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}code{color:#c4f1fa}.result{background:#091321;border:1px solid #2a3c54;border-radius:9px;padding:12px;overflow-wrap:anywhere;font: .82rem/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d9e7fa}.step{border-left:2px solid #315a73;padding:0 0 22px 17px;margin:20px 0;position:relative}.step:before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--cyan)}.eyebrow{font-size:.72rem;color:var(--cyan);letter-spacing:.09em}.btn{background:var(--cyan);color:#07111d;font-weight:800;border:0;border-radius:9px;padding:12px 16px;cursor:pointer}.btn:disabled{opacity:.55;cursor:wait}table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;vertical-align:top;padding:11px 8px;border-bottom:1px solid var(--line)}th{color:var(--cyan)}.timeline{display:grid;grid-template-columns:65px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.year{color:var(--cyan);font-weight:800}.bar{height:8px;background:#26374e;border-radius:9px;overflow:hidden;margin:8px 0}.bar span{display:block;height:100%;background:var(--cyan)}footer{font-size:.78rem;color:#8193ac;margin-top:25px;border-top:1px solid var(--line);padding-top:18px}
-@media(max-width:680px){.wrap{padding:20px 14px}.grid{grid-template-columns:1fr}.panel{padding:15px}table{font-size:.8rem}th,td{padding:9px 5px}.flow div{flex-basis:40%}}
+:root{--bg:#f3f5f7;--card:#fff;--ink:#14202b;--mute:#52616f;--line:#cfd8e0;--a:#1f4e79;--b:#b4590a;--code:#e8eef4}
+@media (prefers-color-scheme:dark){:root{--bg:#10171e;--card:#18222c;--ink:#e6edf3;--mute:#9db0c1;--line:#2b3a47;--a:#7db4e6;--b:#f0a45d;--code:#223140}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:860px;margin:0 auto;padding:40px 20px 80px}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25;font-weight:700}
+h1{font-size:2.2rem;margin:0 0 8px}
+h2{font-size:1.5rem;margin:56px 0 12px;padding-top:16px;border-top:2px solid var(--a)}
+h3{font-size:1.1rem;margin:0 0 6px;color:var(--a)}
+p{margin:0 0 12px}
+.lead{color:var(--mute);font-size:1.05rem;max-width:62ch}
+code,.hex{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:var(--code);padding:1px 5px;border-radius:3px;word-break:break-all}
+.box{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:12px 0}
+.tag{display:inline-block;font-size:.78rem;border:1px solid var(--b);color:var(--b);border-radius:3px;padding:0 7px;margin-left:8px;vertical-align:middle;font-family:system-ui,sans-serif;font-weight:600}
+ol.pipe{list-style:none;padding:0;margin:20px 0;border-left:3px solid var(--a)}
+ol.pipe li{background:var(--card);border:1px solid var(--line);border-radius:6px;margin:0 0 14px 18px;padding:12px 16px;position:relative}
+ol.pipe li::before{content:"";position:absolute;left:-26px;top:20px;width:12px;height:12px;background:var(--a);border-radius:50%}
+ol.pipe .op{display:block;color:var(--b);font-weight:600;font-size:.9rem}
+ol.pipe .size{color:var(--mute);font-size:.88rem}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:.93rem;margin:12px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--code)}
+.scroll{overflow-x:auto}
+.tl{list-style:none;padding:0;margin:16px 0;border-left:3px solid var(--b)}
+.tl li{margin:0 0 12px 16px;padding-left:4px}
+.tl b{font-family:ui-monospace,Menlo,monospace;color:var(--b)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+footer{margin-top:48px;color:var(--mute);font-size:.88rem}
+a{color:var(--a)}
 </style>
 </head>
-<body><main class="wrap">
-<header>
-<div class="top"><span class="tag"> HOMEWORK 02</span><span class="small"></span></div>
-<h1>From Seed to <span>Address.</span></h1>
-<p class="lead">An interactive exploration of mnemonic phrases, hierarchical deterministic key derivation, elliptic-curve cryptography, hashing, checksums, and the statistical properties of Ethereum wallets.</p>
-<div class="grid" style="margin-top:23px">
-<div class="metric"><div class="label">KEY MANAGEMENT</div><strong>BIP-32 / BIP-44</strong><span class="small">Deterministic key hierarchy</span></div>
-<div class="metric"><div class="label">PUBLIC-KEY CRYPTOGRAPHY</div><strong>secp256k1</strong><span class="small">Private key → public key</span></div>
-<div class="metric"><div class="label">ADDRESS HASH</div><strong>Keccak-256</strong><span class="small">256-bit digest</span></div>
+<body>
+<main>
+
+<h1>From Wallet Seed to Ethereum Address</h1>
+<p class="lead">Hashing, key derivation and cryptographic primitives in the Ethereum wallet pipeline (Homework 2). Each step uses a different tool because each step solves a different problem.</p>
+
+<h2>1. The pipeline</h2>
+<ol class="pipe">
+  <li><b>Mnemonic</b> (12–24 words)<span class="size">Human-readable encoding of random entropy plus a checksum.</span></li>
+  <li><span class="op">BIP-39: PBKDF2-HMAC-SHA512, 2048 rounds</span><b>Seed</b> <span class="size">512 bits</span></li>
+  <li><span class="op">BIP-32 + BIP-44: HMAC-SHA512 chain, path m/44'/60'/0'/0/0</span><b>Private key</b> <span class="size">256 bits</span></li>
+  <li><span class="op">secp256k1: scalar multiplication K = k·G</span><b>Public key</b> <span class="size">64 bytes (x ‖ y)</span></li>
+  <li><span class="op">Keccak-256 of the 64 bytes, keep the last 20 bytes</span><b>Address</b> <span class="size">160 bits = 40 hex characters</span></li>
+  <li><span class="op">EIP-55: capitalise hex letters using a Keccak-256 of the address</span><b>Checksummed address</b> <span class="size">same 160 bits, same length</span></li>
+</ol>
+
+<div class="box">
+<p><b>Worked example</b> (public test vector, never use it for real funds). Mnemonic <code>abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about</code> with an empty passphrase and path <code>m/44'/60'/0'/0/0</code> gives the address <code>0x9858EfFD232B4033E47d90003D41EC34EcaEda94</code>. Check it yourself in a wallet or an offline BIP-39 tool.</p>
 </div>
-</header>
-<nav class="nav" aria-label="Site sections">
-<button class="active" data-tab="overview">01 · Overview</button><button data-tab="lab">02 · Wallet Lab</button><button data-tab="standards">03 · Standards</button><button data-tab="stats">04 · Statistics</button><button data-tab="history">05 · Timeline</button>
-</nav>
-<section class="section active" id="overview">
-<div class="panel"><h2>The cryptographic pipeline</h2><p class="muted">Every component solves a different problem: deterministic key management, public-key mathematics, hashing, or human-visible error detection.</p>
-<div class="flow"><div><b>Mnemonic</b>BIP-39</div><span class="arrow">→</span><div><b>Seed</b>512 bits</div><span class="arrow">→</span><div><b>HD derivation</b>BIP-32 / 44</div><span class="arrow">→</span><div><b>Private key</b>secret scalar</div></div>
-<div class="flow"><div><b>Public key</b>secp256k1</div><span class="arrow">→</span><div><b>Hash</b>Keccak-256</div><span class="arrow">→</span><div><b>Address</b>20 bytes</div><span class="arrow">→</span><div><b>Checksum</b>EIP-55</div></div>
-<div class="grid"><div><h3>Generation</h3><p class="small">Creates initial key material, typically starting with cryptographically secure randomness. BIP-39 represents entropy as words.</p></div><div><h3>Derivation</h3><p class="small">Computes child keys deterministically from a seed-derived master key and a path. The same inputs produce the same keys.</p></div><div><h3>Encoding & checksum</h3><p class="small">Hexadecimal represents bytes as text. EIP-55 uses letter capitalization to help detect address typing errors; it does not hide data.</p></div></div></div>
 
-</section>
-<section class="section" id="lab"><div class="panel">
-<h2>Wallet derivation lab</h2><p class="muted small">Click Run Demo to derive a test wallet using ethers.js. The mnemonic is public and deliberately unsafe.</p>
-<p class="small">PUBLIC TEST MNEMONIC</p><div class="result" id="phrase">test test test test test test test test test test test junk</div>
-<p style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><button class="btn" id="run">Run derivation demo ↗</button><button class="secondary" id="reset">Reset output</button><span class="small" id="status" aria-live="polite">Ready. Internet required to load ethers.js.</span></p>
-<div class="step"><div class="eyebrow">STEP 01 · BIP-39</div><h3>Mnemonic → 512-bit seed</h3><div class="result" id="seed">Run the demo to calculate the seed.</div><p class="small">PBKDF2-HMAC-SHA512, 2048 iterations; an optional passphrase changes the resulting seed.</p></div>
-<div class="step"><div class="eyebrow">STEP 02 · BIP-32 / BIP-44</div><h3>Seed → derived wallet</h3><div class="result">m/44'/60'/0'/0/0</div><p class="small">44' = purpose · 60' = Ethereum coin type · 0' = account · 0 = external chain · 0 = address index.</p><p class="small">PRIVATE KEY (TEST ONLY)</p><div class="result" id="priv">—</div></div>
-<div class="step"><div class="eyebrow">STEP 03 · secp256k1</div><h3>Private key → public key</h3><div class="result" id="pub">—</div><p class="small">The public key is computed through elliptic-curve scalar multiplication. Reversing this operation to recover the private key is computationally infeasible with known practical methods.</p></div>
-<div class="step"><div class="eyebrow">STEP 04 · Keccak-256</div><h3>Public key → Ethereum address</h3><div class="result" id="addr">—</div><p class="small">Hash the 64-byte public key without the 0x04 prefix; take the final 20 bytes (40 hex characters).</p></div>
-<div class="step"><div class="eyebrow">STEP 05 · EIP-55</div><h3>Checksummed address</h3><div class="result" id="check">—</div><p class="small" id="checkmsg">Mixed capitalization detects many, but not all, transcription errors. It does not prove ownership.</p></div>
-<h3>Hash function example</h3><p class="small">Input: <code>Hello Ethereum</code></p><div class="result" id="hash">—</div>
-</div></section>
-<section class="section" id="standards"><div class="panel"><h2>Standards & primitives</h2>
-<table><thead><tr><th>Technology</th><th>Role</th><th>Key property</th></tr></thead><tbody>
-<tr><td><b>BIP-39</b></td><td>Maps entropy to a mnemonic and derives a binary seed.</td><td>Deterministic; optional passphrase.</td></tr>
-<tr><td><b>BIP-32</b></td><td>Defines hierarchical deterministic parent/child key derivation.</td><td>Repeatable key tree; hardened and non-hardened children.</td></tr>
-<tr><td><b>BIP-44</b></td><td>Defines a multi-account derivation path convention.</td><td><code>m / purpose' / coin_type' / account' / change / address_index</code></td></tr>
-<tr><td><b>secp256k1</b></td><td>Elliptic curve for Ethereum public keys and signatures.</td><td>Private scalar → public curve point.</td></tr>
-<tr><td><b>Keccak-256</b></td><td>Hashes the uncompressed public key to derive the address.</td><td>256-bit output; avalanche effect.</td></tr>
-<tr><td><b>EIP-55</b></td><td>Encodes an address using hash-dependent letter capitalization.</td><td>Error detection, not encryption.</td></tr>
-</tbody></table>
-<h3 style="margin-top:20px">Encoding is not encryption</h3><p class="small">Hex encoding maps each byte to two hexadecimal characters. It is reversible representation, not encryption. EIP-55 changes capitalization based on the hash of the lowercase address; the underlying 20 address bytes remain the same.</p>
-<h3>Why not use one algorithm?</h3><p class="small">Key derivation requires deterministic secret-tree management; elliptic curves provide public/private key relationships and signatures; hashes compress arbitrary-length input into fixed-length digests; checksums help detect mistakes in human-readable strings. These are distinct tasks with different requirements.</p>
-</div></section>
-<section class="section" id="stats"><div class="panel"><h2>Statistical properties</h2><p class="muted">Security depends on entropy, output distributions, and the computational difficulty of attacks.</p>
-<div class="grid"><div class="metric"><div class="label">BIP-39 SEED</div><strong>512 bits</strong><span class="small">64 bytes; PBKDF2-HMAC-SHA512 output.</span></div><div class="metric"><div class="label">KECCAK DIGEST</div><strong>256 bits</strong><span class="small">64 hexadecimal characters.</span></div><div class="metric"><div class="label">ETHEREUM ADDRESS</div><strong>160 bits</strong><span class="small">20 bytes; 40 hex characters, excluding 0x.</span></div></div>
-<h3 style="margin-top:22px">BIP-39 entropy and mnemonic length</h3><p class="small">BIP-39 adds ENT/32 checksum bits to ENT bits of entropy, then divides the result into 11-bit word indices.</p>
-<table><thead><tr><th>Entropy</th><th>Words</th><th>Ideal search space from entropy</th></tr></thead><tbody><tr><td>128 bits</td><td>12</td><td>2¹²⁸</td></tr><tr><td>160 bits</td><td>15</td><td>2¹⁶⁰</td></tr><tr><td>192 bits</td><td>18</td><td>2¹⁹²</td></tr><tr><td>224 bits</td><td>21</td><td>2²²⁴</td></tr><tr><td>256 bits</td><td>24</td><td>2²⁵⁶</td></tr></tbody></table>
-<h3 style="margin-top:22px">What should we expect statistically?</h3><p><b>Determinism.</b> Same mnemonic + passphrase + derivation path → same key and address. This is deterministic computation, not fresh randomness each run.</p><p><b>Hash outputs.</b> An ideal 256-bit hash is modeled as uniformly distributed over 2²⁵⁶ outputs. The birthday collision scale is approximately 2¹²⁸ random inputs.</p><p><b>Address space.</b> A 160-bit address has 2¹⁶⁰ possible values. For independently sampled random addresses, birthday collisions become relevant around 2⁸⁰ samples. This is a mathematical scale, not a prediction that ordinary wallets will collide.</p>
-<div class> </div></div></section>
-<section class="section" id="history"><div class="panel"><h2>Historical timeline</h2><p class="muted">From public-key cryptography to modern wallet standards.</p>
-<div class="timeline"><div class="year">1977</div><div><b>RSA</b><p class="small">A foundational public-key cryptosystem supporting encryption and digital signatures.</p></div></div>
-<div class="timeline"><div class="year">2001</div><div><b>SHA-2 / SHA-512</b><p class="small">NIST published SHA-2 in FIPS 180-2. SHA-512 produces a 512-bit digest and is used by BIP-39's PBKDF2-HMAC-SHA512 seed derivation.</p></div></div>
-<div class="timeline"><div class="year">2012</div><div><b>BIP-32</b><p class="small">Bitcoin Improvement Proposal defining hierarchical deterministic wallets and child-key derivation.</p></div></div>
-<div class="timeline"><div class="year">2013</div><div><b>BIP-39</b><p class="small">Mnemonic code for representing entropy and deriving a seed for deterministic wallets.</p></div></div>
-<div class="timeline"><div class="year">2014</div><div><b>BIP-44</b><p class="small">A multi-account hierarchy and derivation path convention built on BIP-32.</p></div></div>
-<div class="timeline"><div class="year">2015</div><div><b>SHA-3 standardized</b><p class="small">NIST standardized SHA-3 in FIPS 202, based on the Keccak sponge construction.</p></div></div>
-<div class="timeline"><div class="year">2016</div><div><b>EIP-55</b><p class="small">Proposed mixed-case checksum encoding for Ethereum addresses.</p></div></div>
-<h3 style="margin-top:22px">SHA-2 versus Keccak / SHA-3</h3><p class="small">SHA-2 and SHA-3 are different hash-function families. SHA-512 belongs to SHA-2. SHA-3 is based on Keccak, but Ethereum's Keccak-256 uses a different padding/domain-separation convention from standardized SHA3-256. They therefore produce different digests for the same input. Keccak was selected for SHA-3 before the standard was finalized in 2015.</p></div></section>
+<h2>2. The primitives, one by one</h2>
 
+<div class="box">
+<h3>BIP-39: mnemonic and seed <span class="tag">encoding + derivation</span></h3>
+<p>Fresh random entropy (128 to 256 bits) gets a short checksum (entropy length ÷ 32 bits) appended, and the result is cut into 11-bit groups. Each group indexes a 2048-word list. 128 + 4 = 132 bits = 12 words; 256 + 8 = 264 bits = 24 words. The seed is then derived with PBKDF2-HMAC-SHA512, 2048 iterations, using the string "mnemonic" plus an optional passphrase as salt. The passphrase ("25th word") produces a completely different wallet from the same words.</p>
+</div>
+
+<div class="box">
+<h3>BIP-32: hierarchical deterministic keys <span class="tag">derivation</span></h3>
+<p>The seed goes through HMAC-SHA512 with the key "Bitcoin seed". The left 256 bits become the master private key, the right 256 bits the chain code. Each child key is computed from the parent key, the parent chain code and an index. Indexes from 2<sup>31</sup> up are <i>hardened</i> (shown with ') and use the private key, so a leaked child public key plus chain code cannot reveal the parent private key. One seed therefore yields a whole tree of keys.</p>
+</div>
+
+<div class="box">
+<h3>BIP-44: standard paths <span class="tag">convention</span></h3>
+<p>Fixes the tree layout: <code>m / 44' / coin_type' / account' / change / address_index</code>. Ethereum uses coin type 60, so the first account is <code>m/44'/60'/0'/0/0</code>, the second <code>…/0/1</code>. Ethereum has no separate change addresses, so the change level stays 0. A shared convention lets different wallets restore the same addresses from the same mnemonic.</p>
+</div>
+
+<div class="box">
+<h3>secp256k1: public-key cryptography <span class="tag">asymmetric</span></h3>
+<p>An elliptic curve <code>y² = x³ + 7</code> over the prime field p = 2<sup>256</sup> − 2<sup>32</sup> − 977, with a generator point G of prime order n ≈ 2<sup>256</sup>. A private key is an integer k in [1, n−1]; the public key is K = k·G. Computing K from k is fast, but recovering k from K is the elliptic-curve discrete logarithm problem, which is infeasible at this size. The same relationship lets the owner sign transactions with ECDSA so anyone can verify the signature using only the public key.</p>
+</div>
+
+<div class="box">
+<h3>Keccak-256: hashing <span class="tag">one-way</span></h3>
+<p>Takes the 64-byte public key (x and y, without the 0x04 prefix) and compresses it into 32 bytes. Ethereum keeps the last 20 bytes as the address. Hashing is one-way and deterministic: no key can be recovered from the address, and a single changed input bit gives an unrelated output.</p>
+</div>
+
+<div class="box">
+<h3>EIP-55: mixed-case checksum <span class="tag">error detection</span></h3>
+<p>Take the lowercase 40-character hex address (no 0x), hash its ASCII text with Keccak-256, and look at the hash nibble at the same position as each address character. If the character is a letter (a–f) and its hash nibble is 8 or higher, it is written in uppercase; otherwise lowercase. Digits are unchanged. The address value is not altered, only its capitalisation, so old software that ignores case still works. A typo will almost certainly produce a case pattern that no longer matches.</p>
+</div>
+
+<h2>3. Terms that are easy to confuse</h2>
+<div class="scroll"><table>
+<tr><th>Concept</th><th>What it is</th><th>In this pipeline</th></tr>
+<tr><td>Key generation</td><td>Creating <i>new</i> secret material from a random source.</td><td>Only one place: the initial BIP-39 entropy. Everything after it is a function of it.</td></tr>
+<tr><td>Key derivation</td><td>Deterministically computing keys from existing secrets.</td><td>PBKDF2 (mnemonic → seed), HMAC-SHA512 (seed → master → children), and K = k·G (private → public).</td></tr>
+<tr><td>Public-key cryptography</td><td>A key pair where the public key can be shared and the private key signs.</td><td>secp256k1 / ECDSA.</td></tr>
+<tr><td>Hashing</td><td>One-way fixed-size fingerprint of arbitrary data.</td><td>Keccak-256 for the address; SHA-512 inside PBKDF2 and HMAC; Keccak-256 again inside EIP-55.</td></tr>
+<tr><td>Checksum</td><td>Redundancy that detects accidental errors. It gives no secrecy and no protection against an attacker.</td><td>BIP-39 checksum bits in the last word; EIP-55 capitalisation.</td></tr>
+<tr><td>Encoding</td><td>Reversible change of representation, no secret involved.</td><td>Entropy ↔ words, bytes ↔ hex, the 0x prefix.</td></tr>
+</table></div>
+
+<h2>4. Why several techniques and not one algorithm</h2>
+<div class="grid">
+<div class="box"><h3>Key management</h3><p>BIP-39/32/44 let one backup phrase restore unlimited accounts in a predictable order. A hash or a curve alone cannot do that.</p></div>
+<div class="box"><h3>Public/private relationship</h3><p>secp256k1 gives the one-way link between a secret and a shareable value, and the ability to sign. A hash function cannot sign.</p></div>
+<div class="box"><h3>Hashing</h3><p>Keccak-256 shortens and fingerprints the public key. It is not reversible and has no algebraic structure to attack.</p></div>
+<div class="box"><h3>Error detection</h3><p>EIP-55 protects users from typos. It does not add security against attackers, and secp256k1 or Keccak cannot do this job for humans typing text.</p></div>
+</div>
+<p>Each primitive has one role and is replaceable without breaking the others, which is the usual design principle in cryptographic systems.</p>
+
+<h2>5. Chronological context</h2>
+<ul class="tl">
+<li><b>1977</b> RSA, the first widely used public-key system.</li>
+<li><b>2000–2001</b> secp256k1 is defined in SEC 2 (2000); SHA-2 including SHA-512 is standardised (2001).</li>
+<li><b>2012</b> BIP-32 (HD wallets); Keccak wins the NIST SHA-3 competition.</li>
+<li><b>2013</b> BIP-39 (mnemonic phrases).</li>
+<li><b>2014</b> BIP-44 (multi-account paths); Ethereum design is published.</li>
+<li><b>2015</b> SHA-3 standardised (FIPS 202); Ethereum launches.</li>
+<li><b>2016</b> EIP-55 (mixed-case checksum addresses).</li>
+</ul>
+<p>The order matters: Bitcoin-era standards (BIP-32/39/44) were adopted by Ethereum wallets unchanged, and Ethereum only added Keccak-256 and EIP-55 on top.</p>
+
+<h2>6. SHA-2 / SHA-512 vs Keccak / SHA-3</h2>
+<div class="scroll"><table>
+<tr><th></th><th>SHA-2 / SHA-512</th><th>Keccak-256 (Ethereum)</th><th>SHA3-256 (NIST)</th></tr>
+<tr><td>Design</td><td>Merkle–Damgård with a compression function</td><td>Sponge construction</td><td>Same sponge as Keccak</td></tr>
+<tr><td>Standardised</td><td>2001</td><td>Competition winner 2012; Ethereum used the pre-standard version</td><td>2015</td></tr>
+<tr><td>Padding</td><td>Length-based</td><td>Suffix byte <code>0x01</code></td><td>Suffix byte <code>0x06</code> (domain separation)</td></tr>
+<tr><td>Hash of empty input</td><td>(not applicable)</td><td><span class="hex">c5d24601…5d85a470</span></td><td><span class="hex">a7ffc6f8…80f8434a</span></td></tr>
+</table></div>
+<p>NIST changed the padding of Keccak when standardising it as SHA-3, so SHA3-256 and Keccak-256 give different outputs for the same input. Ethereum had already adopted the original version, and its libraries call it <code>keccak256</code>. SHA-512 is used in the BIP-39/BIP-32 steps; Keccak-256 is used for addresses and EIP-55. SHA-2 and SHA-3 are unrelated in structure, so a break of one need not affect the other.</p>
+
+<h2>7. Statistical properties</h2>
+<ul>
+<li><b>Entropy is the only randomness.</b> A 128-bit seed gives 2<sup>128</sup> possibilities; 256 bits gives 2<sup>256</sup>. Everything downstream is deterministic and cannot add entropy, so weak initial randomness ruins the whole chain.</li>
+<li><b>Uniform outputs.</b> HMAC-SHA512 and Keccak-256 outputs look uniformly random: each bit is 0 or 1 with probability ½, and every hex digit appears with about 1/16 frequency.</li>
+<li><b>Avalanche effect.</b> Flipping one input bit flips about half the output bits (on average 128 of 256 for Keccak-256). Similar mnemonics give completely unrelated seeds and addresses.</li>
+<li><b>Address space.</b> 160 bits means 2<sup>160</sup> addresses. By the birthday bound, an accidental collision between two addresses needs about 2<sup>80</sup> addresses, which is out of reach.</li>
+<li><b>Mnemonic checksum.</b> A 12-word phrase has 4 checksum bits, so a random wrong phrase passes with probability 1/16 (24 words: 8 bits, 1/256). It catches typos, not attackers.</li>
+<li><b>EIP-55 strength.</b> An address has on average 15 letters (40 × 6/16), each with a 50% chance of the right case by luck. A random error is therefore missed with probability about 2<sup>−15</sup> ≈ 0.003%.</li>
+<li><b>Work factor.</b> PBKDF2 with 2048 rounds multiplies the cost of each brute-force guess on a weak phrase or passphrase by 2048. It does not rescue a low-entropy phrase.</li>
+</ul>
+
+<h2>8. Experiments to try</h2>
+<ol>
+<li>Create a <b>throwaway</b> wallet in MetaMask, Rabby, Rainbow or Exodus and write down its 12 words. Never use a mnemonic that has held real funds.</li>
+<li>Import the same words into a second wallet and confirm both show the same first address (BIP-39/44 compatibility).</li>
+<li>Add a passphrase on import (where supported) and observe that the addresses change completely.</li>
+<li>Add accounts and compare the paths: <code>…/0/0</code>, <code>…/0/1</code>, <code>…/0/2</code>. Some wallets (e.g. Ledger Live style) vary the account level instead; note the difference.</li>
+<li>Take an address, change one letter's case, and paste it into a wallet that validates EIP-55; it should be rejected or warned about. An all-lowercase version carries no checksum and is accepted.</li>
+<li>Optional: in a script, compute Keccak-256 and SHA3-256 of the empty string and confirm they differ.</li>
+</ol>
+
+<footer>Test vector and figures are standard published values; verify them with your own tools as part of the assignment.</footer>
 </main>
-<script>
-document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>{
- document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===button));
- document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===button.dataset.tab));
-}));
-const ids=['seed','priv','pub','addr','check','hash'];
-function reset(){ids.forEach(id=>document.getElementById(id).textContent=id==='seed'?'Run the demo to calculate the seed.':'—');document.getElementById('checkmsg').textContent='Mixed capitalization detects many, but not all, transcription errors. It does not prove ownership.';document.getElementById('status').textContent='Ready. Internet required to load ethers.js.';}
-document.getElementById('reset').addEventListener('click',reset);
-document.getElementById('run').addEventListener('click',async()=>{
- const button=document.getElementById('run'),status=document.getElementById('status');button.disabled=true;status.textContent='Calculating…';
- try{
-  if(!window.ethers)await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js';s.onload=resolve;s.onerror=()=>reject(new Error('Could not load ethers.js. Check your internet connection.'));document.head.appendChild(s);});
-  const e=window.ethers,phrase='test test test test test test test test test test test junk',mnemonic=e.Mnemonic.fromPhrase(phrase),seed=mnemonic.computeSeed(),wallet=e.HDNodeWallet.fromPhrase(phrase,'',"m/44'/60'/0'/0/0");
-  const pub=wallet.publicKey,raw=pub.startsWith('0x04')?'0x'+pub.slice(4):pub,hash=e.keccak256(raw),address='0x'+hash.slice(-40),checksummed=e.getAddress(address.toLowerCase());
-  document.getElementById('seed').textContent=seed;document.getElementById('priv').textContent=wallet.privateKey;document.getElementById('pub').textContent=pub;document.getElementById('addr').textContent=address;document.getElementById('check').textContent=checksummed;document.getElementById('hash').textContent=e.keccak256(e.toUtf8Bytes('Hello Ethereum'));document.getElementById('checkmsg').textContent='Checksum valid: '+(e.getAddress(checksummed)===checksummed?'YES':'NO')+'. Capitalization changes, address bytes do not.';status.textContent='Demo complete. Same phrase and path → same address.';
- }catch(error){status.textContent='Error: '+error.message;}finally{button.disabled=false;}
-});
-</script>
-</body></html>
+</body>
+</html>
