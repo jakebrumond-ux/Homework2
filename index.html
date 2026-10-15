@@ -91,7 +91,7 @@ a{color:var(--a)}
 <h2>3. Terms that are easy to confuse</h2>
 <div class="scroll"><table>
 <tr><th>Concept</th><th>What it is</th><th>In this pipeline</th></tr>
-<tr><td>Key generation</td><td>Creating <i>new</i> secret material from a random source.</td><td>Only one place: the initial BIP-39 entropy. Everything after it is a function of it.</td></tr>
+<tr><td>Key generation</td><td>Creating <i>new</i> secret material from a random source.</td><td>Key generation creates new key material, typically starting from random entropy. Key derivation deterministically computes a seed, master key, or child key from existing input material.</td></tr>
 <tr><td>Key derivation</td><td>Deterministically computing keys from existing secrets.</td><td>PBKDF2 (mnemonic → seed), HMAC-SHA512 (seed → master → children), and K = k·G (private → public).</td></tr>
 <tr><td>Public-key cryptography</td><td>A key pair where the public key can be shared and the private key signs.</td><td>secp256k1 / ECDSA.</td></tr>
 <tr><td>Hashing</td><td>One-way fixed-size fingerprint of arbitrary data.</td><td>Keccak-256 for the address; SHA-512 inside PBKDF2 and HMAC; Keccak-256 again inside EIP-55.</td></tr>
@@ -137,7 +137,7 @@ a{color:var(--a)}
 <li><b>Avalanche effect.</b> Flipping one input bit flips about half the output bits (on average 128 of 256 for Keccak-256). Similar mnemonics give completely unrelated seeds and addresses.</li>
 <li><b>Address space.</b> 160 bits means 2<sup>160</sup> addresses. By the birthday bound, an accidental collision between two addresses needs about 2<sup>80</sup> addresses, which is out of reach.</li>
 <li><b>Mnemonic checksum.</b> A 12-word phrase has 4 checksum bits, so a random wrong phrase passes with probability 1/16 (24 words: 8 bits, 1/256). It catches typos, not attackers.</li>
-<li><b>EIP-55 strength.</b> An address has on average 15 letters (40 × 6/16), each with a 50% chance of the right case by luck. A random error is therefore missed with probability about 2<sup>−15</sup> ≈ 0.003%.</li>
+<li><b>EIP-55 strength.</b> An address has on average 15 letters (40 × 6/16), each with a 50% chance of the right case by luck. A random error is therefore missed with probability about 2<sup>−15</sup> ≈ 0.0247%. This is an approximate error-detection probability.</li>
 <li><b>Work factor.</b> PBKDF2 with 2048 rounds multiplies the cost of each brute-force guess on a weak phrase or passphrase by 2048. It does not rescue a low-entropy phrase.</li>
 </ul>
 
